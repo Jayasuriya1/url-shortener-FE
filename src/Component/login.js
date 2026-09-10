@@ -164,11 +164,6 @@ export default function Login() {
               Sign Up
             </Link>
           </div>
-          <div className="demo">
-            <p className="m-0 font-weight-bold">For Demo:</p>
-            <p className="m-0">Email: jayasuriya@gmail.com</p>
-            <p className="m-0">Password: user@123</p>
-          </div>
         </Col>
       </Row>
       <Dialog

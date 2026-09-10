@@ -16,6 +16,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import { API_URL } from "../config";
 
 const userSchemaValidation = yup.object({
   email: yup.string().email().required("Please enter a valid email address"),
@@ -47,13 +48,12 @@ export default function Login() {
       },
       validationSchema: userSchemaValidation,
       onSubmit: async (data) => {
-        console.log("Data", data);
         try {
           setLoading(true);
-          await localStorage.removeItem("clintId");
-          await localStorage.removeItem("authToken");
+          localStorage.removeItem("clintId");
+          localStorage.removeItem("authToken");
           const response = await fetch(
-            "https://url-shortener-xndv.onrender.com/user/login",
+            `${API_URL}/user/login`,
             {
               method: "POST",
               body: JSON.stringify(data),
@@ -63,23 +63,22 @@ export default function Login() {
             }
           );
           const result = await response.json();
-          console.log("result", result);
           if (
-            result.success == false &&
-            result.message ==
+            result.success === false &&
+            result.message ===
               "Please Verify The Email. Verification Link Send To Your Mail Successfully"
           ) {
             handleClickOpen();
-          }
-          if (result.success == true) {
+          } else if (result.success === true) {
             localStorage.setItem("authToken", result.token);
             localStorage.setItem("clintId", result.id);
             navigate("/dashboard");
           } else {
-            toast.error(result.message);
+            toast.error(result.message || "Login failed");
           }
         } catch (error) {
           console.log(error);
+          toast.error("Something went wrong. Please try again.");
         } finally {
           setLoading(false);
         }
@@ -88,7 +87,7 @@ export default function Login() {
   return (
     <Container fluid className="login-container">
       {loading ? (
-        <Box sx={{ width: "100vw" }}>
+        <Box sx={{ width: "100%" }}>
           <LinearProgress />
         </Box>
       ) : (
@@ -98,7 +97,7 @@ export default function Login() {
         <span className="d-flex align-items-center">
           <h1
             style={{
-              fontWeight: "1000",
+              fontWeight: "900",
               paddingLeft: "20px",
               paddingTop: "10px",
             }}
@@ -107,15 +106,15 @@ export default function Login() {
           </h1>
         </span>
       </div>
-      <Row className="mt-5 justify-content-around align-items-center">
-        <Col className="login-content" md={4}>
+      <Row className="mt-4 justify-content-around align-items-center px-3">
+        <Col className="login-content mb-4 mb-md-0" md={5} lg={5}>
           <h1>
             THE IDEA IS TO MINIMIZE THE WEB PAGE ADDRESS INTO SOMETHING THAT'S
             EASIER TO REMEMBER AND TRACK.
           </h1>
         </Col>
-        <Col md={4}>
-          <h3 style={{ fontWeight: "350" }}>Sign in</h3>
+        <Col md={5} lg={4}>
+          <h3 style={{ fontWeight: "400" }} className="mb-3">Sign in</h3>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="formGroupEmail">
               <Form.Label>Email address</Form.Label>
@@ -129,7 +128,7 @@ export default function Login() {
               />
             </Form.Group>
             {touched.email && errors.email ? (
-              <p style={{ color: "crimson" }}>{errors.email}</p>
+              <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.email}</p>
             ) : (
               ""
             )}
@@ -145,15 +144,15 @@ export default function Login() {
               />
             </Form.Group>
             {touched.password && errors.password ? (
-              <p style={{ color: "crimson" }}>{errors.password}</p>
+              <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.password}</p>
             ) : (
               ""
             )}
-            <Button className="w-100" variant="danger" type="submit">
+            <Button className="w-100 mt-2" variant="danger" type="submit">
               Next
             </Button>
           </Form>
-          <p className="text-center mt-2">
+          <p className="text-center mt-3">
             Forgot{" "}
             <Link style={{ color: "#ffffff" }} to={"/forgotPassword"}>
               password?
@@ -166,9 +165,9 @@ export default function Login() {
             </Link>
           </div>
           <div className="demo">
-            <p className="m-0">For Demo:</p>
+            <p className="m-0 font-weight-bold">For Demo:</p>
             <p className="m-0">Email: jayasuriya@gmail.com</p>
-            <p className="m-0">password: user@123</p>
+            <p className="m-0">Password: user@123</p>
           </div>
         </Col>
       </Row>
@@ -179,13 +178,13 @@ export default function Login() {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"A verification link has send to your email account"}
+          {"A verification link has been sent to your email account"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Please click on the link that has just been sent to your email
             account to verify your email and continue the registration process.
-            {"Note :"} Link valid for 15 minutes.
+            {" Note: "} Link valid for 15 minutes.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -195,3 +194,4 @@ export default function Login() {
     </Container>
   );
 }
+

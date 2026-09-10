@@ -15,6 +15,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import { API_URL } from "../config";
 
 const userSchemaValidation = yup.object({
   email: yup.string().email().required("Please enter a valid email address"),
@@ -22,7 +23,6 @@ const userSchemaValidation = yup.object({
 
 export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
-
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -43,7 +43,7 @@ export default function ForgotPassword() {
         try {
           setLoading(true);
           const response = await fetch(
-            "https://url-shortener-xndv.onrender.com/user/forget-password",
+            `${API_URL}/user/forget-password`,
             {
               method: "POST",
               body: JSON.stringify(data),
@@ -53,15 +53,15 @@ export default function ForgotPassword() {
             }
           );
           const result = await response.json();
-          if (result.success == true) {
+          if (result.success === true) {
             handleClickOpen();
             resetForm();
-          }
-          if (result.success == false) {
-            toast.error(result.message);
+          } else {
+            toast.error(result.message || "Password reset request failed");
           }
         } catch (error) {
           console.log(error);
+          toast.error("Something went wrong. Please try again.");
         } finally {
           setLoading(false);
         }
@@ -70,7 +70,7 @@ export default function ForgotPassword() {
   return (
     <Container fluid className="login-container">
       {loading ? (
-        <Box sx={{ width: "100vw" }}>
+        <Box sx={{ width: "100%" }}>
           <LinearProgress color="success" />
         </Box>
       ) : (
@@ -80,7 +80,7 @@ export default function ForgotPassword() {
         <span className="d-flex align-items-center">
           <h1
             style={{
-              fontWeight: "1000",
+              fontWeight: "900",
               paddingLeft: "20px",
               paddingTop: "10px",
             }}
@@ -89,16 +89,16 @@ export default function ForgotPassword() {
           </h1>
         </span>
       </div>
-      <Row className="mt-5 justify-content-around align-items-center">
-        <Col className="login-content" md={4}>
+      <Row className="mt-4 justify-content-around align-items-center px-3">
+        <Col className="login-content mb-4 mb-md-0" md={5} lg={5}>
           <h1>
             THE IDEA IS TO MINIMIZE THE WEB PAGE ADDRESS INTO SOMETHING THAT'S
             EASIER TO REMEMBER AND TRACK.
           </h1>
         </Col>
-        <Col md={4}>
-          <h3 style={{ fontWeight: "350", textAlign: "center" }}>
-            ForgetYour Password
+        <Col md={5} lg={4}>
+          <h3 style={{ fontWeight: "400" }} className="mb-3">
+            Forgot Your Password
           </h3>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="formGroupEmail">
@@ -113,18 +113,24 @@ export default function ForgotPassword() {
               />
             </Form.Group>
             {touched.email && errors.email ? (
-              <p style={{ color: "crimson" }}>{errors.email}</p>
+              <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.email}</p>
             ) : (
               ""
             )}
-            <Button className="w-100" variant="danger" type="submit">
+            <Button className="w-100 mt-2" variant="danger" type="submit">
               Reset Password
             </Button>
           </Form>
-          <div className="text-center mt-2">
+          <div className="text-center mt-3">
             Not registered yet?{" "}
             <Link style={{ color: "#ffffff" }} to={"/register"}>
               Sign Up
+            </Link>
+          </div>
+          <div className="text-center mt-2">
+            Remembered your password?{" "}
+            <Link style={{ color: "#ffffff" }} to={"/login"}>
+              Log In
             </Link>
           </div>
         </Col>
@@ -136,14 +142,14 @@ export default function ForgotPassword() {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"A verification link has send to your email account"}
+          {"A verification link has been sent to your email account"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Please click on the link that has just been sent to your email
             account to change your password and continue the password reset
             process.
-            {"Note :"} Link valid for 15 minutes.
+            {" Note: "} Link valid for 15 minutes.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -153,3 +159,4 @@ export default function ForgotPassword() {
     </Container>
   );
 }
+

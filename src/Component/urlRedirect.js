@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import Spinner from "react-bootstrap/Spinner";
+import { API_URL } from "../config";
 
 export default function UrlRedirect() {
   const { shortUrl } = useParams();
@@ -8,35 +9,46 @@ export default function UrlRedirect() {
 
   useEffect(() => {
     const redirect = async () => {
-      const response = await fetch(
-        `https://url-shortener-xndv.onrender.com/shortURL/data`
-      );
-      const urlData = await response.json();
-      if (urlData.success === true) {
-        const filterData = urlData.data.find((data) => {
-          return data.shortUrl == shortUrl;
-        });
-        if (filterData) {
-          window.location.replace(filterData.longUrl);
-          const response2 = await fetch(
-            `https://url-shortener-xndv.onrender.com/shortURL/update/clickcount/${shortUrl}`,
-            {
-              method: "PUT",
-              body: JSON.stringify(),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          const result2 = await response2.json();
+      try {
+        const response = await fetch(
+          `${API_URL}/shortURL/data`
+        );
+        const urlData = await response.json();
+        if (urlData.success === true && Array.isArray(urlData.data)) {
+          const filterData = urlData.data.find((data) => {
+            return data.shortUrl === shortUrl;
+          });
+          if (filterData) {
+            fetch(
+              `${API_URL}/shortURL/update/clickcount/${shortUrl}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            ).catch((err) => console.log(err));
+
+            window.location.replace(filterData.longUrl);
+          } else {
+            navigate("/nopage");
+          }
         } else {
           navigate("/nopage");
         }
-      } else {
+      } catch (error) {
+        console.log(error);
         navigate("/nopage");
       }
     };
     redirect();
-  }, []);
-  return <div></div>;
+  }, [shortUrl, navigate]);
+
+  return (
+    <div className="d-flex w-100 vh-100 justify-content-center align-items-center flex-column gap-3">
+      <Spinner animation="border" variant="primary" />
+      <p className="text-muted fw-semibold">Redirecting to destination...</p>
+    </div>
+  );
 }
+

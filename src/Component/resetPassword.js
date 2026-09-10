@@ -10,6 +10,7 @@ import * as yup from "yup";
 import { toast } from "react-toastify";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import { API_URL } from "../config";
 
 const userSchemaValidation = yup.object({
   password: yup
@@ -33,7 +34,7 @@ export default function ResetPassword() {
         try {
           setLoading(true);
           const response = await fetch(
-            `https://url-shortener-xndv.onrender.com/user/reset-password/${id}/${token}`,
+            `${API_URL}/user/reset-password/${id}/${token}`,
             {
               method: "POST",
               body: JSON.stringify(data),
@@ -43,15 +44,15 @@ export default function ResetPassword() {
             } 
           );
           const result = await response.json();
-          if (result.success == true) {
-            toast.success(result.message);
+          if (result.success === true) {
+            toast.success(result.message || "Password reset successful");
             navigate("/login");
-          }
-          if (result.success == false) {
-            toast.error(result.message);
+          } else {
+            toast.error(result.message || "Failed to reset password");
           }
         } catch (error) {
           console.log(error);
+          toast.error("Something went wrong. Please try again.");
         } finally {
           setLoading(false);
         }
@@ -60,7 +61,7 @@ export default function ResetPassword() {
   return (
     <Container fluid className="login-container">
       {loading ? (
-        <Box sx={{ width: "100vw" }}>
+        <Box sx={{ width: "100%" }}>
           <LinearProgress color="success" />
         </Box>
       ) : (
@@ -70,7 +71,7 @@ export default function ResetPassword() {
         <span className="d-flex align-items-center">
           <h1
             style={{
-              fontWeight: "1000",
+              fontWeight: "900",
               paddingLeft: "20px",
               paddingTop: "10px",
             }}
@@ -79,16 +80,16 @@ export default function ResetPassword() {
           </h1>
         </span>
       </div>
-      <Row className="mt-5 justify-content-around align-items-center">
-        <Col className="login-content" md={4}>
+      <Row className="mt-4 justify-content-around align-items-center px-3">
+        <Col className="login-content mb-4 mb-md-0" md={5} lg={5}>
           <h1>
             THE IDEA IS TO MINIMIZE THE WEB PAGE ADDRESS INTO SOMETHING THAT'S
             EASIER TO REMEMBER AND TRACK.
           </h1>
         </Col>
-        <Col md={4}>
-          <h3 style={{ fontWeight: "350", textAlign: "center" }}>
-            Forget Your Password
+        <Col md={5} lg={4}>
+          <h3 style={{ fontWeight: "400" }} className="mb-3">
+            Reset Your Password
           </h3>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="formGroupEmail">
@@ -103,11 +104,11 @@ export default function ResetPassword() {
               />
             </Form.Group>
             {touched.password && errors.password ? (
-              <p style={{ color: "crimson" }}>{errors.password}</p>
+              <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.password}</p>
             ) : (
               ""
             )}
-            <Button className="w-100" variant="danger" type="submit">
+            <Button className="w-100 mt-2" variant="danger" type="submit">
               Reset Password
             </Button>
           </Form>
@@ -116,3 +117,4 @@ export default function ResetPassword() {
     </Container>
   );
 }
+

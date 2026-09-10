@@ -21,23 +21,24 @@ export default function BaseApp({ children }) {
         data-bs-theme="dark"
       >
         <Container>
-          <Navbar.Brand href="#home" className="d-flex align-items-center">
+          <Navbar.Brand onClick={() => navigate("/dashboard")} style={{ cursor: "pointer" }} className="d-flex align-items-center gap-2">
             <box-icon name="chart" type="solid" color="#1462fe"></box-icon>
+            <span className="text-white fw-bold">URL Shortener</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="#" onClick={() => navigate("/dashboard")}>
+              <Nav.Link onClick={() => navigate("/dashboard")}>
                 Dashboard
               </Nav.Link>
-              <Nav.Link href="#" onClick={() => navigate("/create")}>
+              <Nav.Link onClick={() => navigate("/create")}>
                 Create URL
               </Nav.Link>
-              <Nav.Link href="#" onClick={() => navigate("/link/details")}>
-                View URL
+              <Nav.Link onClick={() => navigate("/link/details")}>
+                View URL List
               </Nav.Link>
-              <Nav.Link onClick={() => logOut()} href="#">
-                LogOut
+              <Nav.Link onClick={() => logOut()} className="text-danger">
+                Logout
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
@@ -47,3 +48,4 @@ export default function BaseApp({ children }) {
     </div>
   );
 }
+

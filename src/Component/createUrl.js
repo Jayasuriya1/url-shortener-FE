@@ -11,12 +11,13 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import { AppState } from "../Context/AppProvider";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 const urlSchemaValidation = yup.object({
   longUrl: yup
     .string()
-    .url()
-    .required(`We'll need a valid URL, like "yourbrnd.co/niceurl"`),
+    .url("Must be a valid URL starting with http:// or https://")
+    .required(`We'll need a valid URL, like "https://yourbrand.co/niceurl"`),
   title: yup
     .string()
     .required("Title is Required")
@@ -31,6 +32,7 @@ export default function CreateUrl() {
   const { setUrl } = AppState();
   const navigate = useNavigate();
   const userId = localStorage.getItem("clintId");
+  const token = localStorage.getItem("authToken");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -52,20 +54,20 @@ export default function CreateUrl() {
     setOpen(false);
   };
 
-  const getData = async (req, res) => {
+  const getData = async () => {
     try {
       const id = localStorage.getItem("clintId");
-      const token = localStorage.getItem("authToken");
+      const authToken = localStorage.getItem("authToken");
       const response = await fetch(
-        `https://url-shortener-xndv.onrender.com/shortURL/data/${id}`,
+        `${API_URL}/shortURL/data/${id}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         }
       );
       const data = await response.json();
-      setUrl(data.data);
+      setUrl(data.data || []);
 
-      if (data.success == false) {
+      if (data.success === false) {
         toast.error(data.message);
         logout();
       }
@@ -86,25 +88,27 @@ export default function CreateUrl() {
           setLoading(true);
 
           const response = await fetch(
-            `https://url-shortener-xndv.onrender.com/shortURL/create/${userId}`,
+            `${API_URL}/shortURL/create/${userId}`,
             {
               method: "POST",
               body: JSON.stringify(data),
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
               },
             }
           );
           const result = await response.json();
-          if (result.success == true) {
+          if (result.success === true) {
             resetForm();
             handleClick();
             getData();
           } else {
-            toast.error(result.message);
+            toast.error(result.message || "Failed to create short URL");
           }
         } catch (error) {
           console.log(error);
+          toast.error("Something went wrong. Please try again.");
         } finally {
           setLoading(false);
         }
@@ -114,37 +118,37 @@ export default function CreateUrl() {
   return (
     <BaseApp>
       {loading ? (
-        <Box sx={{ width: "100vw" }}>
+        <Box sx={{ width: "100%" }}>
           <LinearProgress />
         </Box>
       ) : (
         " "
       )}
       <form onSubmit={handleSubmit}>
-        <Container>
+        <Container className="py-4">
           <Row className="justify-content-center">
-            <Col lg="8" className="pt-4">
-              <h3 style={{ fontWeight: "1000" }}>Create new URL</h3>
-              <Form.Group className="mb-3 mt-3" controlId="formGroupEmail">
+            <Col xs={12} md={8} lg={6} className="pt-2">
+              <h3 style={{ fontWeight: "800" }}>Create new URL</h3>
+              <Form.Group className="mb-3 mt-3" controlId="formGroupLongUrl">
                 <Form.Label style={{ fontWeight: "600" }}>
-                  Destination
+                  Destination URL
                 </Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="http://example.com/my-long-url"
+                  placeholder="https://example.com/my-long-url"
                   name="longUrl"
                   value={values.longUrl}
                   onBlur={handleBlur}
                   onChange={handleChange}
                 />
                 {touched.longUrl && errors.longUrl ? (
-                  <p style={{ color: "crimson" }}>{errors.longUrl}</p>
+                  <p style={{ color: "crimson", fontSize: "0.875rem" }}>{errors.longUrl}</p>
                 ) : (
                   ""
                 )}
               </Form.Group>
 
-              <Form.Group className="mb-3 mt-3" controlId="formGroupEmail">
+              <Form.Group className="mb-3 mt-3" controlId="formGroupTitle">
                 <Form.Label style={{ fontWeight: "600" }}>Title</Form.Label>
                 <Form.Control
                   type="text"
@@ -155,13 +159,13 @@ export default function CreateUrl() {
                   onChange={handleChange}
                 />
                 {touched.title && errors.title ? (
-                  <p style={{ color: "crimson" }}>{errors.title}</p>
+                  <p style={{ color: "crimson", fontSize: "0.875rem" }}>{errors.title}</p>
                 ) : (
                   ""
                 )}
               </Form.Group>
-              <button type="submit" className="create-btn">
-                Create
+              <button type="submit" className="create-btn mt-2">
+                Create Short URL
               </button>
             </Col>
           </Row>
@@ -169,9 +173,10 @@ export default function CreateUrl() {
       </form>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          Short URL Created Successfully
+          Short URL Created Successfully!
         </Alert>
       </Snackbar>
     </BaseApp>
   );
 }
+

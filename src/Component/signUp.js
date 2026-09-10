@@ -15,6 +15,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import { API_URL } from "../config";
 
 const userSchemaValidation = yup.object({
   firstName: yup
@@ -34,8 +35,7 @@ const userSchemaValidation = yup.object({
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
-
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -58,7 +58,7 @@ export default function SignUp() {
         try {
           setLoading(true);
           const response = await fetch(
-            "https://url-shortener-xndv.onrender.com/user/signup",
+            `${API_URL}/user/signup`,
             {
               method: "POST",
               body: JSON.stringify(data),
@@ -68,18 +68,15 @@ export default function SignUp() {
             }
           );
           const result = await response.json();
-          if (result.success == true) {
+          if (result.success === true) {
             handleClickOpen();
-          }
-
-          if (result.success == false) {
-            toast.error(result.message);
-          }
-          if (result.success == true) {
             resetForm();
+          } else {
+            toast.error(result.message || "Signup failed");
           }
         } catch (error) {
           console.log(error);
+          toast.error("Something went wrong. Please try again.");
         } finally {
           setLoading(false);
         }
@@ -88,7 +85,7 @@ export default function SignUp() {
   return (
     <Container fluid className="login-container">
       {loading ? (
-        <Box sx={{ width: "100vw" }}>
+        <Box sx={{ width: "100%" }}>
           <LinearProgress color="success" />
         </Box>
       ) : (
@@ -98,7 +95,7 @@ export default function SignUp() {
         <span className="d-flex align-items-center">
           <h1
             style={{
-              fontWeight: "1000",
+              fontWeight: "900",
               paddingLeft: "20px",
               paddingTop: "10px",
             }}
@@ -107,26 +104,25 @@ export default function SignUp() {
           </h1>
         </span>
       </div>
-      <Row className="mt-5 justify-content-around align-items-center">
-        <Col className="login-content" md={4}>
+      <Row className="mt-4 justify-content-around align-items-center px-3">
+        <Col className="login-content mb-4 mb-md-0" md={5} lg={5}>
           <h1>
             THE IDEA IS TO MINIMIZE THE WEB PAGE ADDRESS INTO SOMETHING THAT'S
             EASIER TO REMEMBER AND TRACK.
           </h1>
         </Col>
-        <Col md={4}>
+        <Col md={6} lg={5}>
           <h3
             style={{
-              fontWeight: "350",
-              textAlign: "center",
-              paddingBottom: "20px",
+              fontWeight: "400",
+              paddingBottom: "15px",
             }}
           >
             Sign up and start shortening
           </h3>
           <Form onSubmit={handleSubmit}>
             <Row>
-              <Col className="pb-2">
+              <Col sm={6} className="pb-2">
                 <Form.Label>First Name</Form.Label>
                 <Form.Control
                   placeholder="First name"
@@ -136,13 +132,13 @@ export default function SignUp() {
                   onChange={handleChange}
                 />
                 {touched.firstName && errors.firstName ? (
-                  <p style={{ color: "crimson" }}>{errors.firstName}</p>
+                  <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.firstName}</p>
                 ) : (
                   ""
                 )}
               </Col>
 
-              <Col className="pb-2">
+              <Col sm={6} className="pb-2">
                 <Form.Label>Last Name</Form.Label>
                 <Form.Control
                   placeholder="Last name"
@@ -152,7 +148,7 @@ export default function SignUp() {
                   onChange={handleChange}
                 />
                 {touched.lastName && errors.lastName ? (
-                  <p style={{ color: "crimson" }}>{errors.lastName}</p>
+                  <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.lastName}</p>
                 ) : (
                   ""
                 )}
@@ -170,7 +166,7 @@ export default function SignUp() {
               />
             </Form.Group>
             {touched.email && errors.email ? (
-              <p style={{ color: "crimson" }}>{errors.email}</p>
+              <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.email}</p>
             ) : (
               ""
             )}
@@ -186,16 +182,16 @@ export default function SignUp() {
               />
             </Form.Group>
             {touched.password && errors.password ? (
-              <p style={{ color: "crimson" }}>{errors.password}</p>
+              <p style={{ color: "#ffcbd1", fontSize: "0.875rem" }}>{errors.password}</p>
             ) : (
               ""
             )}
 
-            <Button className="w-100" variant="danger" type="submit">
+            <Button className="w-100 mt-2" variant="danger" type="submit">
               Next
             </Button>
           </Form>
-          <p className="text-center mt-2">
+          <p className="text-center mt-3">
             Already have an account?{" "}
             <Link style={{ color: "#ffffff" }} to={"/login"}>
               Log In
@@ -210,13 +206,13 @@ export default function SignUp() {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"A verification link has send to your email account"}
+          {"A verification link has been sent to your email account"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Please click on the link that has just been sent to your email
             account to verify your email and continue the registration process.
-            {"Note :"} Link valid for 15 minutes.
+            {" Note: "} Link valid for 15 minutes.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -226,3 +222,4 @@ export default function SignUp() {
     </Container>
   );
 }
+
